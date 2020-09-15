@@ -102,8 +102,25 @@ var
 head(var$coord)
 # Cos2: qualité de répresentation
 head(var$cos2)
+
+# The squared  cosine shows the importance of a component for a given observation. The squared
+# cosine indicates the contribution of a component to the squared distance of the observation to the origin
+# It corresponds to the square of the cosine of the angle from the right triangle made with the origin, 
+# the observation, and its projection
+# Components with a largevalue of cos2i,
+# contribute a relatively large portion to the total distance and therefore these components are important for that observation.
+
+
 # Contributions aux composantes principales
 head(var$contrib)
+
+# Recall that the eigenvalue associated to a component is equal to the sum of the squared factor scores
+# for this component. Therefore, the importance of anobservation for a component can be obtained by the
+# ratio of the squared factor score of this observation bythe eigenvalue associated with that component. 
+# The larger thevalue of the contribution, the more the observation contributes to the component. 
+# A useful heuristic is to base the
+# interpretation of a component on the observations whose contribution is larger thanthe average contribution 
+
 
 
 # variables
