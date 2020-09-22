@@ -149,7 +149,7 @@ res.ca <- CA(doubs$fish, graph = FALSE)
 res.ca <- CA(presabs, graph = FALSE)
 print(res.ca)
 
-#or PCA on transformed data see legendre
+#or PCA on transformed data see legendre P128-130
 # res.ca <- PCA(spe.hel, graph = FALSE)
 
 
