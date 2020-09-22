@@ -262,6 +262,13 @@ coef(spe.rda)
 (R2adj <- RsquareAdj(spe.rda)$adj.r.squared)
 
 
+#selection backward
+ordistep(rda(spe.hel ~ ., env3),
+         scope = rda(spe.hel ~ 1, env3), direction="backward")  
+
+
+
+
 ## Triplots of the rda results (wa scores)
 ## Site scores as weighted averages (vegan's default)
 # Scaling 1 :  distance triplot
@@ -270,6 +277,12 @@ plot(spe.rda,
      scaling = 1, 
      main = "Triplot RDA spe.hel ~ env3 - scaling 1 - wa scores"
 )
+spe.sc1 <- 
+  scores(spe.rda, 
+         choices = 1:2, 
+         scaling = 1, 
+         display = "sp"
+  )
 arrows(0, 0, 
        spe.sc1[, 1] * 0.92, 
        spe.sc1[, 2] * 0.92, 
@@ -282,6 +295,11 @@ arrows(0, 0,
 dev.new(title = "RDA scaling 2 + wa", noRStudioGD = TRUE)
 plot(spe.rda, 
      main = "Triplot RDA spe.hel ~ env3 - scaling 2 - wa scores")
+spe.sc2 <- 
+  scores(spe.rda, 
+         choices = 1:2, 
+         display = "sp"
+  )
 arrows(0, 0, 
        spe.sc2[, 1] * 0.92, 
        spe.sc2[, 2] * 0.92, 
