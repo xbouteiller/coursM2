@@ -1,4 +1,8 @@
-# https://www.davidzeleny.net/anadat-r/doku.php/en:rda_cca_examples
+# http://jinliangliu.weebly.com/uploads/2/5/7/8/25781074/numerical_ecology_with_r.pdf
+
+
+
+spe
 
 # RDA, tb-RDA, CCA & db-RDA (constrained ordination)
 
@@ -80,3 +84,292 @@ ef
 #           if the species Ellenberg indicator values are randomly generated). Check the section
 # Analysis of species attributes for detail explanation on how to solve this
 
+
+
+# RDA data doubs inspired from legendre
+
+# http://jinliangliu.weebly.com/uploads/2/5/7/8/25781074/numerical_ecology_with_r.pdf
+library(ade4)
+library(adegraphics)
+data(doubs)
+str(doubs)
+
+doubs$env
+doubs$fish
+names(doubs$fish) = doubs$species$French
+
+
+#  EXPLO -------------------------------------------------------------------------------------------------
+?table.value
+dev.off()
+table.value(doubs$fish, csize=0.3)
+
+s.value(doubs$xy, scale(apply(ifelse(doubs$fish>0,1,0),M=1, sum)), method = c( "greylevel"), zmax=5)
+s.label(doubs$xy,label= row.names(doubs$xy),
+        add.plot = TRUE, clabel= 0.7, boxes = FALSE)
+
+s.value(doubs$xy, scale(apply(ifelse(doubs$fish>0,1,0),M=1, sum)), zmax=2.5)
+s.label(doubs$xy,label= row.names(doubs$xy),
+        add.plot = TRUE, clabel= 0.7, boxes = FALSE)
+
+
+
+presabs = ifelse(doubs$fish>0,1,0)
+par(mfrow=n2mfrow(ncol(doubs$fish)))
+for(i in 1:ncol(doubs$fish)){
+  s.value(doubs$xy,presabs[,i], sub = colnames(presabs)[i], zmax=4)
+  s.label(doubs$xy,label= row.names(doubs$xy),
+          add.plot = TRUE, clabel= 0.7, boxes = FALSE)
+}
+
+
+#  ENV DATA -------------------------------------------------------------------------------------------------
+
+pca=dudi.pca(doubs$env, scannf = FALSE, nf=2)
+inertia.dudi(pca)
+scatter(pca)
+inertia.dudi(pca, col = TRUE)
+
+
+#  FISH DATA -------------------------------------------------------------------------------------------------
+
+
+spe.hel <- decostand (doubs$fish, 'hell')
+
+library(FactoMineR)
+res.ca <- CA(spe.hel, graph = FALSE)
+#or
+res.ca <- CA(doubs$fish, graph = FALSE)
+#or
+res.ca <- CA(presabs, graph = FALSE)
+print(res.ca)
+
+library ("factoextra")
+eig.val <- get_eigenvalue (res.ca)
+eig.val
+
+
+fviz_eig(res.ca, addlabels = TRUE, ylim = c(0, 50))
+
+
+col <- get_ca_col(res.ca)
+col
+# Coordonnées
+head(col$coord)
+# Qualité de représentation
+head(col$cos2)
+# Contributions
+head(col$contrib)
+
+fviz_ca_col (res.ca, col.col = "cos2",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE)
+fviz_cos2 (res.ca, choice = "col", axes = 1:2)
+
+# Comme mentionné ci-dessus, le graphique standard de l'analyse factorielle des correspondances est un 
+# biplot symétrique dans lequel les lignes (points bleus) et les colonnes (triangles rouges) sont
+# représentées dans le même espace à l'aide des coordonnées principales. Ces coordonnées représentent
+# les profils des lignes et des colonnes. Dans ce cas, seule la distance
+# entre les points lignes ou la distance entre les points colonnes peut être vraiment interprétée
+
+# Avec un biplot symétrique, la distance entre les lignes et les colonnes ne peut pas être interprétée.
+# Seules des conclusions générales peuvent être tirées.
+
+fviz_ca_biplot (res.ca, repel = TRUE)
+
+
+# Notez que, pour interpréter la distance entre les points colonnes et les points lignes, 
+# le moyen le plus simple est de créer un biplot asymétrique. Cela signifie que les profils des
+# colonnes doivent être représentés dans l'espace des lignes ou vice versa. 
+
+fviz_ca_biplot (res.ca,
+                map = "rowprincipal", arrow = c(TRUE, TRUE),
+                repel = TRUE)
+
+# Si l'angle entre deux flèches est aigu, alors il y a une forte association entre les 
+# lignes et les colonnes correspondantes.
+# 
+# Pour interpréter la distance entre les lignes et les colonnes, vous devriez 
+# projeter perpendiculairement des points lignes sur la flèche de la colonne.
+
+#  RDA -------------------------------------------------------------------------------------------------
+
+library(vegan)
+
+fish = doubs$fish[-8,]
+env = doubs$env[-8,]
+
+# Remove the 'dfs' variable from the env data frame
+env2 <- env[, -1]
+# Recode the slope variable (slo) into a factor (qualitative) 
+# variable to show how these are handled in the ordinations
+slo2 <- rep(".very_steep", nrow(env))
+slo2[env$slo <= quantile(env$slo)[4]] <- ".steep"
+slo2[env$slo <= quantile(env$slo)[3]] <- ".moderate"
+slo2[env$slo <= quantile(env$slo)[2]] <- ".low"
+slo2 <- factor(slo2, 
+               levels = c(".low", ".moderate", ".steep", ".very_steep"))
+table(slo2)
+# Create an env3 data frame with slope as a qualitative variable
+env3 <- env2
+env3$slo <- slo2
+
+
+
+# spe.hel <- decostand (spe.log, 'hell')  # we are planning to do tb-RDA, this is Hellinger pre-transformation
+
+spe.hel <- decostand (fish, 'hell')
+
+
+
+## RDA of the Hellinger-transformed fish species data, constrained
+## by all the environmental variables contained in env3
+(spe.rda <- rda(spe.hel ~ ., env3)) # Observe the shortcut formula
+summary(spe.rda)	# Scaling 2 (default)
+
+
+# 
+# Conceptually, RDA is a multivariate (meaning multiresponse) multiple linear
+# regression followed by a PCA of the table of fitted values. It works as follows, on
+# a matrix Y of centred response data and a matrix X of centred (or, more generally,
+#                                                                standardized) explanatory variables
+
+
+
+constrained_eig <- spe.rda$CCA$eig/spe.rda$tot.chi*100
+unconstrained_eig <- spe.rda$CA$eig/spe.rda$tot.chi*100
+expl_var <- c(constrained_eig, unconstrained_eig)
+barplot (expl_var[1:20], col = c(rep ('red', length (constrained_eig)), rep ('black', length (unconstrained_eig))),
+         las = 2, ylab = '% variation')
+
+
+# Canonical coefficients from the rda object
+coef(spe.rda)
+# Unadjusted R^2 retrieved from the rda object
+(R2 <- RsquareAdj(spe.rda)$r.squared)
+# Adjusted R^2 retrieved from the rda object
+(R2adj <- RsquareAdj(spe.rda)$adj.r.squared)
+
+## Triplots of the rda results (lc scores)
+## Site scores as linear combinations of the environmental variables
+dev.new(
+  title = "RDA scaling 1 and 2 + lc",
+  width = 16,
+  height = 8,
+  noRStudioGD = TRUE
+)
+# dev.new(
+#   title = "RDA scaling 1 and 2 + lc",
+#   width = 6,
+#   height = 12,
+#   noRStudioGD = TRUE
+# )
+par(mfrow = c(1, 2))
+# par(mfrow = c(2, 1))
+plot(spe.rda,
+     scaling = 1,
+     display = c("sp", "lc", "cn"),
+     main = "Triplot RDA spe.hel ~ env3 - scaling 1 - lc scores"
+)
+spe.sc1 <- 
+  scores(spe.rda, 
+         choices = 1:2, 
+         scaling = 1, 
+         display = "sp"
+  )
+arrows(0, 0, 
+       spe.sc1[, 1] * 0.92,
+       spe.sc1[, 2] * 0.92,
+       length = 0, 
+       lty = 1, 
+       col = "red"
+)
+# text(-0.75, 0.7, "a", cex = 1.5)
+
+# Scaling 2
+plot(spe.rda, 
+     display = c("sp", "lc", "cn"), 
+     main = "Triplot RDA spe.hel ~ env3 - scaling 2 - lc scores"
+)
+spe.sc2 <- 
+  scores(spe.rda, 
+         choices = 1:2, 
+         display = "sp"
+  )
+arrows(0, 0, 
+       spe.sc2[, 1] * 0.92, 
+       spe.sc2[, 2] * 0.92,
+       length = 0,
+       lty = 1,
+       col = "red"
+)
+# text(-0.82, 0.55, "b", cex = 1.5)
+
+
+## Triplots of the rda results (wa scores)
+## Site scores as weighted averages (vegan's default)
+# Scaling 1 :  distance triplot
+dev.new(title = "RDA scaling 1 + wa", noRStudioGD = TRUE)
+plot(spe.rda, 
+     scaling = 1, 
+     main = "Triplot RDA spe.hel ~ env3 - scaling 1 - wa scores"
+)
+arrows(0, 0, 
+       spe.sc1[, 1] * 0.92, 
+       spe.sc1[, 2] * 0.92, 
+       length = 0, 
+       lty = 1, 
+       col = "red"
+)
+
+# Scaling 2 (default) :  correlation triplot
+dev.new(title = "RDA scaling 2 + wa", noRStudioGD = TRUE)
+plot(spe.rda, 
+     main = "Triplot RDA spe.hel ~ env3 - scaling 2 - wa scores")
+arrows(0, 0, 
+       spe.sc2[, 1] * 0.92, 
+       spe.sc2[, 2] * 0.92, 
+       length = 0, 
+       lty = 1, 
+       col = "red"
+)
+
+# Select species with goodness-of-fit at least 0.6 in the 
+# ordination plane formed by axes 1 and 2
+spe.good <- goodness(spe.rda)
+sel.sp <- which(spe.good[, 2] >= 0.6)
+# Triplots with homemade function triplot.rda(), scalings 1 and 2
+dev.new(
+  title = "RDA plot with triplot.rda",
+  width = 16,
+  height = 8,
+  noRStudioGD = TRUE
+)
+par(mfrow = c(1, 2))
+triplot.rda(spe.rda, 
+            site.sc = "lc", 
+            scaling = 1, 
+            cex.char2 = 0.7, 
+            pos.env = 3, 
+            pos.centr = 1, 
+            mult.arrow = 1.1, 
+            mar.percent = 0.05, 
+            select.spe = sel.sp
+)
+# text(-0.92, 0.72, "a", cex = 2)
+triplot.rda(spe.rda, 
+            site.sc = "lc", 
+            scaling = 2, 
+            cex.char2 = 0.7, 
+            pos.env = 3, 
+            pos.centr = 1, 
+            mult.arrow = 1.1, 
+            mar.percent = 0.05, 
+            select.spe = sel.sp
+)
+# text(-2.82, 2, "b", cex = 2)
+
+# Global test of the RDA result
+anova(spe.rda, permutations = how(nperm = 999))
+# Tests of all canonical axes
+anova(spe.rda, by = "axis", permutations = how(nperm = 999))
