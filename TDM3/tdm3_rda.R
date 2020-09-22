@@ -251,65 +251,12 @@ barplot (expl_var[1:20], col = c(rep ('red', length (constrained_eig)), rep ('bl
 
 # Canonical coefficients from the rda object
 coef(spe.rda)
+
+?RsquareAdj
 # Unadjusted R^2 retrieved from the rda object
 (R2 <- RsquareAdj(spe.rda)$r.squared)
 # Adjusted R^2 retrieved from the rda object
 (R2adj <- RsquareAdj(spe.rda)$adj.r.squared)
-
-## Triplots of the rda results (lc scores)
-## Site scores as linear combinations of the environmental variables
-dev.new(
-  title = "RDA scaling 1 and 2 + lc",
-  width = 16,
-  height = 8,
-  noRStudioGD = TRUE
-)
-# dev.new(
-#   title = "RDA scaling 1 and 2 + lc",
-#   width = 6,
-#   height = 12,
-#   noRStudioGD = TRUE
-# )
-par(mfrow = c(1, 2))
-# par(mfrow = c(2, 1))
-plot(spe.rda,
-     scaling = 1,
-     display = c("sp", "lc", "cn"),
-     main = "Triplot RDA spe.hel ~ env3 - scaling 1 - lc scores"
-)
-spe.sc1 <- 
-  scores(spe.rda, 
-         choices = 1:2, 
-         scaling = 1, 
-         display = "sp"
-  )
-arrows(0, 0, 
-       spe.sc1[, 1] * 0.92,
-       spe.sc1[, 2] * 0.92,
-       length = 0, 
-       lty = 1, 
-       col = "red"
-)
-# text(-0.75, 0.7, "a", cex = 1.5)
-
-# Scaling 2
-plot(spe.rda, 
-     display = c("sp", "lc", "cn"), 
-     main = "Triplot RDA spe.hel ~ env3 - scaling 2 - lc scores"
-)
-spe.sc2 <- 
-  scores(spe.rda, 
-         choices = 1:2, 
-         display = "sp"
-  )
-arrows(0, 0, 
-       spe.sc2[, 1] * 0.92, 
-       spe.sc2[, 2] * 0.92,
-       length = 0,
-       lty = 1,
-       col = "red"
-)
-# text(-0.82, 0.55, "b", cex = 1.5)
 
 
 ## Triplots of the rda results (wa scores)
@@ -340,40 +287,56 @@ arrows(0, 0,
        col = "red"
 )
 
-# Select species with goodness-of-fit at least 0.6 in the 
-# ordination plane formed by axes 1 and 2
-spe.good <- goodness(spe.rda)
-sel.sp <- which(spe.good[, 2] >= 0.6)
-# Triplots with homemade function triplot.rda(), scalings 1 and 2
-dev.new(
-  title = "RDA plot with triplot.rda",
-  width = 16,
-  height = 8,
-  noRStudioGD = TRUE
-)
-par(mfrow = c(1, 2))
-triplot.rda(spe.rda, 
-            site.sc = "lc", 
-            scaling = 1, 
-            cex.char2 = 0.7, 
-            pos.env = 3, 
-            pos.centr = 1, 
-            mult.arrow = 1.1, 
-            mar.percent = 0.05, 
-            select.spe = sel.sp
-)
-# text(-0.92, 0.72, "a", cex = 2)
-triplot.rda(spe.rda, 
-            site.sc = "lc", 
-            scaling = 2, 
-            cex.char2 = 0.7, 
-            pos.env = 3, 
-            pos.centr = 1, 
-            mult.arrow = 1.1, 
-            mar.percent = 0.05, 
-            select.spe = sel.sp
-)
-# text(-2.82, 2, "b", cex = 2)
+
+
+
+# For the species and sites, the interpretation of the two scalings is the same as in
+# PCA. However, the presence of vectors and centroids of explanatory variables calls
+# for additional interpretation rules. Here are the essential ones (see Legendre and
+#                                                                   Legendre 1998, pp. 586-587):
+
+#   . Scaling 1 - distance biplot: (1) Projecting an object at right angle on a response
+# variable or a quantitative explanatory variable approximates the position of
+# the object along that variable. (2) The angles between response and explanatory
+# variables in the biplot reflect their correlations (but not the angles among
+#                                                     response variables). (3) The relationship between the centroid of a qualitative
+# explanatory variable and a response variable (species) is found by projecting the
+# centroid at right angle on the species variable, as for individual objects, since we
+# are projecting the centroid of a group of objects. (4) Distances among centroids,
+# and between centroids and individual objects, approximate their Euclidean
+# distances.
+
+# . Scaling 2 - correlation biplot: (1) Projecting an object at right angle on a
+# response or a quantitative explanatory variable approximates the value of the
+# object along that variable. (2) The angles in the biplot between response and
+# explanatory variables, and between response variables themselves or explanatory
+# variables themselves, reflect their correlations. (3) The relationship
+# between the centroid of a qualitative explanatory variable and a response variable
+# (species) is found by projecting the centroid at right angle on the species
+
+
+
+
+
+
+# 
+# These triplots show that oxygen (oxy), altitude (alt), nitrates (nit) and
+# discharge
+# (deb), as well as slope (mainly the level penvery_steep) play an
+# important role in the dispersion of the sites along the first axis. Both triplots oppose
+# the upper and lower parts of the river along the first axis. The scaling 2 triplot
+# shows three groups of fish species correlated with different sets of explanatory
+# variables: the brown trout (TRU), Eurasian minnow (VAI) and stone loach (LOC)
+# are found in the first half of the sites, and are correlated with high oxygen content
+# and slope as well as higher altitude. The bleak (ABL), roach (GAR) and European
+# chub (CHE), on the opposite, are related to sites 23, 24 and 25 characterized by high
+# phosphates (pho), ammonium (amm) and biological oxygen demand (dbo) levels.
+# Most other species are bunched together away from these extremes. They show
+# mostly shorter projections, indicating that they are either present over most portions
+# of the river or related to intermediate ecological conditions
+
+
+
 
 # Global test of the RDA result
 anova(spe.rda, permutations = how(nperm = 999))
