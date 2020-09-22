@@ -1,8 +1,13 @@
+# livre de legendre : numerical ecology with R
+# une référence
 # http://jinliangliu.weebly.com/uploads/2/5/7/8/25781074/numerical_ecology_with_r.pdf
 
 
+#  -------------------------------------------------------------------------------------------------
+#  -------------------------------------------------------------------------------------------------
 
-spe
+# exemple RDA
+# https://www.davidzeleny.net/anadat-r/doku.php/en:rda_cca_examples
 
 # RDA, tb-RDA, CCA & db-RDA (constrained ordination)
 
@@ -85,7 +90,8 @@ ef
 # Analysis of species attributes for detail explanation on how to solve this
 
 
-
+#  -------------------------------------------------------------------------------------------------
+#  -------------------------------------------------------------------------------------------------
 # RDA data doubs inspired from legendre
 
 # http://jinliangliu.weebly.com/uploads/2/5/7/8/25781074/numerical_ecology_with_r.pdf
