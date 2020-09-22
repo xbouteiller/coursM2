@@ -143,12 +143,15 @@ inertia.dudi(pca, col = TRUE)
 spe.hel <- decostand (doubs$fish, 'hell')
 
 library(FactoMineR)
-res.ca <- CA(spe.hel, graph = FALSE)
-#or
+
 res.ca <- CA(doubs$fish, graph = FALSE)
 #or
 res.ca <- CA(presabs, graph = FALSE)
 print(res.ca)
+
+#or PCA on transformed data see legendre
+# res.ca <- PCA(spe.hel, graph = FALSE)
+
 
 library ("factoextra")
 eig.val <- get_eigenvalue (res.ca)
