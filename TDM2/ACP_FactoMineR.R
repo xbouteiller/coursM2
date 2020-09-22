@@ -23,9 +23,15 @@ library(corrplot)
 # ------------------------------------------------------------------------------------------------------------
 X = seq(1:100)
 Y = 2*X + rnorm(100, mean=0, sd=20)
-plot(Y~X)
+Z = 2*X + rnorm(100, mean=0, sd=20)
 
-df=data.frame(X,Y)
+par(mfrow = c(2,2))
+plot(Y~X)
+plot(Y~Z)
+plot(Z~X)
+par(mfrow = c(1,1))
+
+df=data.frame(X,Y,Z)
 df
 
 library(ade4)
@@ -34,7 +40,7 @@ inertia.dudi(pca)
 scatter(pca)
 pca$li
 
-plot(pca$li[,1] ~ seq(1:100)) 
+plot(pca$li[,1] ~ X) 
 plot(pca$li[,2] ~ seq(1:100)) 
 
 

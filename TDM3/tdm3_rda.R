@@ -1,3 +1,5 @@
+# https://www.davidzeleny.net/anadat-r/doku.php/en:rda_cca_examples
+
 # RDA, tb-RDA, CCA & db-RDA (constrained ordination)
 
 vltava.spe <- read.delim ('https://raw.githubusercontent.com/zdealveindy/anadat-r/master/data/vltava-spe.txt', row.names = 1)
